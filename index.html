@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Rodziny</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:linear-gradient(135deg,#0c0a09,#020617);color:white;min-height:100vh;display:flex;}
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;width:220px;height:100%;background:rgba(255,255,255,0.05);
+backdrop-filter:blur(14px);padding:30px 20px;display:flex;flex-direction:column;gap:20px;}
+.sidebar h2{margin-bottom:20px;text-align:center;color:#fb923c;}
+.sidebar a{color:white;text-decoration:none;padding:10px;border-radius:10px;transition:0.2s;}
+.sidebar a:hover{background:rgba(255,255,255,0.1);}
+.content{margin-left:240px;padding:40px;width:100%;}
+/* ADMIN BUTTON */
+.admin-btn{position:fixed;top:20px;right:20px;background:#f97316;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;cursor:pointer;z-index:5;}
+/* TITLE */
+h1{text-align:center;margin-top:20px;font-size:48px;}
+/* GLASS CARD */
+.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(14px);padding:40px;border-radius:20px;text-align:center;}
+.stats{display:flex;justify-content:center;gap:40px;margin-top:50px;}
+.stat span{font-size:50px;color:#fb923c;font-weight:bold;}
+/* TABLE */
+.table-section{width:100%;margin:40px auto;}
+table{width:100%;border-collapse:collapse;background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border-radius:15px;overflow:hidden;}
+th{background:#f97316;padding:12px;}
+td{padding:12px;text-align:center;}
+tr:nth-child(even){background:rgba(255,255,255,0.05);}
+/* RANK BADGES */
+.badge{padding:6px 12px;border-radius:20px;font-weight:bold;}
+.rank10{background:#dc2626;}
+.rank9{background:#ea580c;}
+.rank8{background:#f97316;}
+.rank7{background:#fb923c;}
+.rank6{background:#fdba74;}
+.rank5{background:#facc15;color:black;}
+.rank4{background:#22c55e;}
+.rank3{background:#06b6d4;}
+.rank2{background:#6366f1;}
+.rank1{background:#64748b;}
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:9999;}
+.modal.active{display:flex;}
+.modal-box{background:#1e293b;padding:40px;border-radius:20px;width:400px;max-height:90vh;overflow-y:auto;}
+.modal-box input, .modal-box select{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:none;background:#0f172a;color:white;}
+.modal-box button{width:100%;padding:10px;border:none;border-radius:10px;margin-top:5px;cursor:pointer;font-weight:bold;background:#f97316;}
+.delete-btn{background:#ef4444 !important;}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<h2>Menu</h2>
+<a href="#">Strona główna</a>
+<a href="#">Lista pracowników</a>
+<a href="#">Skrzynka</a>
+<a href="#">Urlop</a>
+</div>
+
+<div class="content">
+<button class="admin-btn" onclick="openLoginAdmin()">⚙ Admin</button>
+<h1>PANEL RODZINY</h1>
+
+<div class="stats">
+<div class="card stat">
+<h2>Członkowie rodziny</h2>
+<span id="count">0</span>
+</div>
+</div>
+
+<div class="table-section">
+<table>
+<thead>
+<tr>
+<th>Imię</th>
+<th>UID</th>
+<th>Ranga</th>
+<th>Egzaminy</th>
+<th>Akcje</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+</div>
+</div>
+
+<!-- PANEL LOGOWANIA ADMIN -->
+<div class="modal" id="loginAdminModal">
+<div class="modal-box">
+<h2>Panel Admina - Logowanie</h2>
+<input type="password" id="adminPassInput" placeholder="Hasło główne">
+<button onclick="checkAdminPass()">Zaloguj</button>
+<button onclick="closeLoginAdmin()" style="background:#64748b;">Anuluj</button>
+</div>
+</div>
+
+<!-- PANEL ADMINA -->
+<div class="modal" id="adminPanel">
+<div class="modal-box">
+<h2>Panel Admina</h2>
+
+<h3>Pracownicy</h3>
+<input id="name" placeholder="Imię i nazwisko">
+<input id="uid" placeholder="UID">
+<select id="rank">
+<option value="10">10 | Chief of Family</option>
+<option value="9">9 | Deputy Chief of Family</option>
+<option value="8">8 | Asst. Chief of Family</option>
+<option value="7">7 | Awakend</option>
+<option value="6">6 | Chosen</option>
+<option value="5">5 | Seeker</option>
+<option value="4">4 | Adept</option>
+<option value="3">3 | Member</option>
+<option value="2">2 | Cadet</option>
+<option value="1">1 | Vacation / Suspended</option>
+</select>
+<select id="exam">
+<option value="BASIC">BASIC</option>
+<option value="NEGO">NEGO</option>
+<option value="SHOOTER">SHOOTER</option>
+</select>
+<button onclick="add()">Dodaj pracownika</button>
+
+<hr style="margin:15px 0">
+<input id="editUID" placeholder="UID do edycji">
+<select id="editRank">
+<option value="10">10 | Chief of Family</option>
+<option value="9">9 | Deputy Chief of Family</option>
+<option value="8">8 | Asst. Chief of Family</option>
+<option value="7">7 | Awakend</option>
+<option value="6">6 | Chosen</option>
+<option value="5">5 | Seeker</option>
+<option value="4">4 | Adept</option>
+<option value="3">3 | Member</option>
+<option value="2">2 | Cadet</option>
+<option value="1">1 | Vacation / Suspended</option>
+</select>
+<button onclick="edit()">Edytuj rangę</button>
+
+<hr style="margin:15px 0">
+<input id="deleteUID" placeholder="UID do usunięcia">
+<button class="delete-btn" onclick="remove()">Usuń pracownika</button>
+
+<hr style="margin:15px 0">
+<h3>Użytkownicy logowania</h3>
+<input id="newLogin" placeholder="Login">
+<input id="newPass" placeholder="Hasło">
+<button onclick="addUser()">Dodaj użytkownika</button>
+<select id="deleteUserSelect"></select>
+<button class="delete-btn" onclick="deleteUser()">Usuń użytkownika</button>
+
+<button onclick="closeAdmin()" style="margin-top:10px;">Zamknij</button>
+</div>
+</div>
+
+<script>
+// HASŁO GŁÓWNE ADMINA
+const MASTER_ADMIN_PASS="admin123"; // ustaw swoje główne hasło admina
+
+// JSONBin
+const BIN="69af4de6d0ea881f40021797";
+const KEY="$2a$10$aGDySCRUNkETMRRFjUn/i.l5I4OgqFXhyvttGBTZgoXzROoYqFPP.";
+
+let employees=[];
+let users=[];
+
+const rankNames={
+10:"Chief of Family",9:"Deputy Chief of Family",8:"Asst. Chief of Family",
+7:"Awakend",6:"Chosen",5:"Seeker",4:"Adept",3:"Member",2:"Cadet",1:"Vacation / Suspended"
+};
+
+const table=document.getElementById("table");
+const count=document.getElementById("count");
+const deleteUserSelect=document.getElementById("deleteUserSelect");
+
+// LOAD DATA
+async function load(){
+  const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN}/latest`,{headers:{ "X-Master-Key":KEY }});
+  const data=await res.json();
+  employees=data.record.employees||[];
+  users=data.record.users||[];
+  render();
+  renderUsers();
+}
+
+// SAVE DATA
+async function save(){
+  await fetch(`https://api.jsonbin.io/v3/b/${BIN}`,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json","X-Master-Key":KEY},
+    body:JSON.stringify({employees,users})
+  });
+}
+
+// RENDER EMPLOYEES
+function render(){
+  employees.sort((a,b)=>b.rank-a.rank);
+  count.textContent=employees.length;
+  table.innerHTML="";
+  employees.forEach(e=>{
+    table.innerHTML+=`
+    <tr>
+      <td>${e.name}</td>
+      <td>${e.uid}</td>
+      <td><span class="badge rank${e.rank}">[${e.rank}] ${rankNames[e.rank]}</span></td>
+      <td>${e.exam||"-"}</td>
+      <td><button onclick="deleteDirect('${e.uid}')">❌</button></td>
+    </tr>`;
+  });
+}
+
+// RENDER USERS
+function renderUsers(){
+  deleteUserSelect.innerHTML="";
+  users.forEach(u=>deleteUserSelect.add(new Option(u.login,u.login)));
+}
+
+// CRUD EMPLOYEES
+async function add(){employees.push({name:name.value,uid:uid.value,rank:parseInt(rank.value),exam:exam.value}); await save(); load();}
+async function edit(){let emp=employees.find(e=>e.uid===editUID.value); if(emp){emp.rank=parseInt(editRank.value); await save(); load();}}
+async function remove(){employees=employees.filter(e=>e.uid!==deleteUID.value); await save(); load();}
+async function deleteDirect(uid){employees=employees.filter(e=>e.uid!==uid); await save(); load();}
+
+// CRUD USERS
+async function addUser(){users.push({login:newLogin.value,password:newPass.value}); await save(); load();}
+async function deleteUser(){users=users.filter(u=>u.login!==deleteUserSelect.value); await save(); load();}
+
+// ADMIN MODAL
+function openAdmin(){adminPanel.classList.add("active");}
+function closeAdmin(){adminPanel.classList.remove("active");}
+
+// LOGIN ADMIN MODAL
+function openLoginAdmin(){loginAdminModal.classList.add("active");}
+function closeLoginAdmin(){loginAdminModal.classList.remove("active");}
+function checkAdminPass(){
+  if(adminPassInput.value===MASTER_ADMIN_PASS){
+    closeLoginAdmin();
+    openAdmin();
+  } else alert("Nieprawidłowe hasło!");
+}
+
+load();
+</script>
+
+</body>
+</html>

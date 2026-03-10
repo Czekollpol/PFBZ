@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+
+<meta charset="UTF-8">
+<title>Panel Administracyjny</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body onload="checkAuth()">
+
+<div class="sidebar">
+
+<h2>Menu</h2>
+
+<a href="/">Strona główna</a>
+<a href="/lista">Lista pracowników</a>
+<a href="/paneladm">Panel administracyjny</a>
+
+</div>
+
+<div class="content">
+
+<h1>Panel Administracyjny</h1>
+
+<div class="card">
+
+<h3>Dodaj pracownika</h3>
+
+<input id="name" placeholder="Imię i nazwisko">
+<input id="uid" placeholder="UID">
+
+<select id="rank">
+
+<option value="10">Chief of Family</option>
+<option value="9">Deputy Chief</option>
+<option value="8">Assistant Chief</option>
+<option value="7">Awakend</option>
+<option value="6">Chosen</option>
+<option value="5">Seeker</option>
+<option value="4">Adept</option>
+<option value="3">Member</option>
+<option value="2">Cadet</option>
+<option value="1">Vacation</option>
+
+</select>
+
+<select id="exam">
+
+<option>BASIC</option>
+<option>NEGO</option>
+<option>SHOOTER</option>
+
+</select>
+
+<button onclick="addEmployee()">Dodaj</button>
+<button onclick="logout()">Wyloguj</button>
+
+</div>
+
+</div>
+
+<script src="../js/app.js"></script>
+
+</body>
+</html>

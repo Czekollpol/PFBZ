@@ -2,34 +2,141 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Rodziny</title>
-<link rel="stylesheet" href="css/style.css">
-</head>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:linear-gradient(135deg,#0c0a09,#020617);color:white;min-height:100vh;display:flex;}
 
+/* SIDEBAR */
+.sidebar{
+position:fixed;
+left:0;top:0;width:220px;height:100%;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(14px);
+padding:30px 20px;display:flex;flex-direction:column;gap:20px;
+}
+.sidebar h2{margin-bottom:20px;text-align:center;color:#fb923c;}
+.sidebar a{color:white;text-decoration:none;padding:10px;border-radius:10px;transition:0.2s;}
+.sidebar a:hover{background:rgba(255,255,255,0.1);}
+
+.content{margin-left:240px;padding:40px;width:100%;}
+
+/* TITLE */
+h1{text-align:center;margin-top:20px;font-size:48px;}
+
+/* GLASS CARD */
+.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(14px);padding:40px;border-radius:20px;text-align:center;}
+.stats{display:flex;justify-content:center;gap:40px;margin-top:50px;}
+.stat span{font-size:50px;color:#fb923c;font-weight:bold;}
+
+/* TABLE */
+.table-section{width:100%;margin:40px auto;}
+table{width:100%;border-collapse:collapse;background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border-radius:15px;overflow:hidden;}
+th{background:#f97316;padding:12px;}
+td{padding:12px;text-align:center;}
+tr:nth-child(even){background:rgba(255,255,255,0.05);}
+
+/* RANK BADGES */
+.badge{padding:6px 12px;border-radius:20px;font-weight:bold;}
+.rank10{background:#dc2626;}
+.rank9{background:#ea580c;}
+.rank8{background:#f97316;}
+.rank7{background:#fb923c;}
+.rank6{background:#fdba74;}
+.rank5{background:#facc15;color:black;}
+.rank4{background:#22c55e;}
+.rank3{background:#06b6d4;}
+.rank2{background:#6366f1;}
+.rank1{background:#64748b;}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:9999;}
+.modal.active{display:flex;}
+.modal-box{background:#1e293b;padding:40px;border-radius:20px;width:400px;max-height:90vh;overflow-y:auto;}
+.modal-box input, .modal-box select{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:none;background:#0f172a;color:white;}
+.modal-box button{width:100%;padding:10px;border:none;border-radius:10px;margin-top:5px;cursor:pointer;font-weight:bold;background:#f97316;}
+.delete-btn{background:#ef4444 !important;}
+</style>
+</head>
 <body>
 
 <div class="sidebar">
 <h2>Menu</h2>
-
-<a href="/">Strona główna</a>
-<a href="/lista">Lista pracowników</a>
-<a href="/paneladm">Panel administracyjny</a>
-<a href="/logowanie">Logowanie</a>
-
+<a href="index.html">Strona główna</a>
+<a href="paneladm/index.html">Panel administracyjny</a>
+<a href="logowanie/index.html">Logowanie</a>
 </div>
 
 <div class="content">
-
 <h1>PANEL RODZINY</h1>
 
-<div class="card">
-Witaj w systemie zarządzania rodziną.
+<div class="stats">
+<div class="card stat">
+<h2>Członkowie rodziny</h2>
+<span id="count">0</span>
+</div>
 </div>
 
+<div class="table-section">
+<table>
+<thead>
+<tr>
+<th>Imię</th>
+<th>UID</th>
+<th>Ranga</th>
+<th>Egzaminy</th>
+</tr>
+</thead>
+<tbody id="table"></tbody>
+</table>
+</div>
 </div>
 
-</body>
-</html>
+<script>
+const BIN="69af4de6d0ea881f40021797"; // wklej swój BIN ID
+const KEY="$2a$10$aGDySCRUNkETMRRFjUn/i.l5I4OgqFXhyvttGBTZgoXzROoYqFPP."; // wklej swój Master Key
+
+let employees=[];
+
+const rankNames={
+10:"Chief of Family",
+9:"Deputy Chief of Family",
+8:"Asst. Chief of Family",
+7:"Awakend",
+6:"Chosen",
+5:"Seeker",
+4:"Adept",
+3:"Member",
+2:"Cadet",
+1:"Vacation / Suspended"
+};
+
+async function load(){
+const res=await fetch(`https://api.jsonbin.io/v3/b/${BIN}/latest`,{headers:{ "X-Master-Key":KEY }});
+const data=await res.json();
+employees=data.record.employees||[];
+render();
+}
+
+function render(){
+employees.sort((a,b)=>b.rank-a.rank);
+document.getElementById("count").textContent=employees.length;
+const table=document.getElementById("table");
+table.innerHTML="";
+employees.forEach(e=>{
+table.innerHTML+=`
+<tr>
+<td>${e.name||"-"}</td>
+<td>${e.uid||"-"}</td>
+<td><span class="badge rank${e.rank}">[${e.rank}] ${rankNames[e.rank]}</span></td>
+<td>${e.exam||"-"}</td>
+</tr>
+`;
+});
+}
+
+load();
 </script>
 
 </body>
